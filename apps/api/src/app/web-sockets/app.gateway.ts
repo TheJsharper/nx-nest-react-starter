@@ -10,6 +10,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     private logger: Logger = new Logger(AppGateway.name);
 
     @WebSocketServer() wss: Server;
+    
     afterInit(server: Server) {
         this.logger.log('initialized server ', server);
     }
