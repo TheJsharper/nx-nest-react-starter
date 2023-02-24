@@ -1,12 +1,13 @@
 import SocketClient from "./components/socket-client.component";
+import { io, Socket } from "socket.io-client";
+import { ServerToClientEvents, ClientToServerEvents } from '@types';
 
-import * as socketClient from 'socket.io-client';
-const socket = socketClient.io("http://localhost:3333/", {});
+const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
 
 export function App() {
 
   return (
-   <SocketClient/>
+    <SocketClient socketRef={socket} />
   );
 
 }
