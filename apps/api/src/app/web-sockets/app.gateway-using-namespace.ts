@@ -18,7 +18,7 @@ export class AppGatewayUsingNamespace implements OnGatewayInit, OnGatewayConnect
 
     @SubscribeMessage('chatToServer')
     handleMessage(client: SocketClient<ClientToServerEvents, ServerToClientEvents>, message: Message): void {
-        
+        console.log("message is coming from frontend....", message);
         this.wss.emit('chatToClient', message);
     }
 

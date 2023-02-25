@@ -7,7 +7,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ClientToServerEvents, Message, ServerToClientEvents } from "@types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 
@@ -60,18 +60,28 @@ export function ResponsiveDialog(props: ResponsiveDialogProps) {
 
 
 export interface SocketClientProps {
-    socketRef: Socket<ClientToServerEvents, ServerToClientEvents>;
+    socketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
 }
 
 
 export const SocketClient = (props: SocketClientProps) => {
-    const [message, setMessage] = useState<string>("");
+    const [messageText, setMessageText] = useState<string>("");
     const [sender, setSender] = useState<string>("");
-    props.socketRef.on('chatToServer', (message: Message) => { console.log("===>say", message) })
-    const setUserName = (name: string) => {
-        console.log("====>name ", name);
-        setSender(name);
-    }
+    const [messages, setMessages] = useState<Array<Message>>([]);
+
+    const setUserName = (name: string) => setSender(name);
+
+
+    useEffect(() => {
+        const conn = props.socketRef.on('chatToClient', (messageToclient: Message) => {
+            setMessageText(messageToclient.message);
+            messages.push(messageToclient);
+            setMessages([...messages]);
+
+        })
+        return () => { console.log("component deytroy fnc"); conn.disconnect(); }
+    }, []);
+
 
     return (
         <>
@@ -83,14 +93,14 @@ export const SocketClient = (props: SocketClientProps) => {
                 <Input
                     placeholder="Chat...."
                     required
-                    value={message
-                    }
+                    value={messageText}
                     sx={{ mb: 1, fontSize: 'var(--joy-fontSize-sm)' }}
-                    onChange={(event) => setMessage(event.target.value)}
+                    onChange={(event) => { event.preventDefault(); setMessageText(event.target.value) }}
                 />
-                <Button type="submit" onClick={() => props.socketRef.emit("chatToClient", { message, sender })}>send</Button>
+                <Button type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender }) }}>send</Button>
             </form>
             <ResponsiveDialog setUserName={setUserName} />
+            {messages.map((value: Message, index: number) => value.message ? (<div key={index}> {value.sender} : {value.message}</div>) : null)}
         </>
     );
 }
