@@ -63,7 +63,7 @@ export function ResponsiveDialog(props: ResponsiveDialogProps) {
 
 export interface SocketClientProps {
     socketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
-    colors: Map<boolean, { bgcolor: string }>;
+    colors: Map<string, { bgcolor: string, isUsed: boolean }>;
 }
 
 
@@ -79,9 +79,9 @@ export const SocketClient = (props: SocketClientProps) => {
     console.log("====>x", props);
 
 
-    const [colors, setColors] = useState<Map<boolean, { bgcolor: string }>>(props.colors);
+    const [colors, setColors] = useState<Map<string, { bgcolor: string, isUsed: boolean }>>(props.colors);
 
-    const [curColor, setCurColor] = useState<{ bgcolor: string }>({bgcolor:'#fff'});
+    const [curColor, setCurColor] = useState<{ bgcolor: string }>({ bgcolor: '#fff' });
 
 
     const getCurrColor = () => {
@@ -90,21 +90,37 @@ export const SocketClient = (props: SocketClientProps) => {
             const newColors = resetColors();
             setColors(newColors);
             const newIndex = findFirstElement();
-            return Array.from(colors.entries())[newIndex][1];
+            const el = Array.from(colors.entries())[newIndex][1];
+            setUsedColor(newIndex);
+            return el;
         } else {
-            return Array.from(colors.entries())[index][1]
+            const el = Array.from(colors.entries())[index][1];
+            setUsedColor(index);
+            return el;
         }
     };
 
     const findFirstElement = () => {
-        const index: number = Array.from(colors.entries()).findIndex((value: [boolean, { bgcolor: string }]) => value[0]);
+        const index: number = Array.from(colors.entries()).findIndex((value: [string, { bgcolor: string, isUsed: boolean }]) => !value[1].isUsed);
         return index;
     }
-    const resetColors = () => {
-        return Array.from(colors.entries()).reduce((prev: Map<boolean, { bgcolor: string }>, cur: [boolean, { bgcolor: string }]) => {
-            prev.set(false, cur[1]);
+    const setUsedColor = (index: number) => {
+        Array.from(colors.entries()).findIndex((value: [string, { bgcolor: string, isUsed: boolean }]) => !value[1].isUsed)
+        Array.from(colors.entries()).reduce((prev: Map<string, { bgcolor: string, isUsed: boolean }>, cur: [string, { bgcolor: string, isUsed: boolean }], mapIndex: number) => {
+            if (mapIndex == index) {
+                prev.set(cur[0], { ...cur[1], isUsed: true });
+            } else {
+                prev.set(cur[0], { ...cur[1], isUsed: false });
+            }
             return prev;
-        }, new Map<boolean, { bgcolor: string }>())
+        }, new Map<string, { bgcolor: string, isUsed: boolean }>())
+    }
+    const resetColors = () => {
+        return Array.from(colors.entries()).reduce((prev: Map<string, { bgcolor: string, isUsed: boolean }>, cur: [string, { bgcolor: string, isUsed: boolean }]) => {
+
+            prev.set(cur[0], { ...cur[1], isUsed: false });
+            return prev;
+        }, new Map<string, { bgcolor: string, isUsed: boolean }>())
     }
 
     useEffect(() => {
@@ -117,7 +133,7 @@ export const SocketClient = (props: SocketClientProps) => {
         return () => { console.log("component deytroy fnc"); conn.disconnect(); }
     }, []);
 
-    
+
 
     return (
         <div className="chat-container">
