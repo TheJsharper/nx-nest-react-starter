@@ -1,4 +1,4 @@
-import { Input } from "@mui/material";
+import { Avatar, Input, List, ListItem, ListItemText, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -9,11 +9,13 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { ClientToServerEvents, Message, ServerToClientEvents } from "@types";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import { } from '@mui/material/colors'
 
 
 export interface ResponsiveDialogProps {
-    setUserName: (value: string) => void
+    setUserName: (value: string) => void;
 }
+
 
 
 export function ResponsiveDialog(props: ResponsiveDialogProps) {
@@ -61,47 +63,88 @@ export function ResponsiveDialog(props: ResponsiveDialogProps) {
 
 export interface SocketClientProps {
     socketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
+    colors: Map<boolean, { bgcolor: string }>;
 }
 
 
 export const SocketClient = (props: SocketClientProps) => {
     const [messageText, setMessageText] = useState<string>("");
+
     const [sender, setSender] = useState<string>("");
+
     const [messages, setMessages] = useState<Array<Message>>([]);
 
     const setUserName = (name: string) => setSender(name);
 
+    console.log("====>x", props);
+
+
+    const [colors, setColors] = useState<Map<boolean, { bgcolor: string }>>(props.colors);
+
+    const [curColor, setCurColor] = useState<{ bgcolor: string }>({bgcolor:'#fff'});
+
+
+    const getCurrColor = () => {
+        const index: number = findFirstElement();
+        if (index === -1) {
+            const newColors = resetColors();
+            setColors(newColors);
+            const newIndex = findFirstElement();
+            return Array.from(colors.entries())[newIndex][1];
+        } else {
+            return Array.from(colors.entries())[index][1]
+        }
+    };
+
+    const findFirstElement = () => {
+        const index: number = Array.from(colors.entries()).findIndex((value: [boolean, { bgcolor: string }]) => value[0]);
+        return index;
+    }
+    const resetColors = () => {
+        return Array.from(colors.entries()).reduce((prev: Map<boolean, { bgcolor: string }>, cur: [boolean, { bgcolor: string }]) => {
+            prev.set(false, cur[1]);
+            return prev;
+        }, new Map<boolean, { bgcolor: string }>())
+    }
 
     useEffect(() => {
         const conn = props.socketRef.on('chatToClient', (messageToclient: Message) => {
-            setMessageText(messageToclient.message);
             messages.push(messageToclient);
             setMessages([...messages]);
 
-        })
+        });
+        setCurColor(getCurrColor());
         return () => { console.log("component deytroy fnc"); conn.disconnect(); }
     }, []);
 
+    
 
     return (
-        <>
+        <div className="chat-container">
             <form
                 onSubmit={(event) => {
                     event.preventDefault();
                 }}
             >
-                <Input
+                <TextField
+                    multiline
+                    rows={4}
                     placeholder="Chat...."
-                    required
                     value={messageText}
                     sx={{ mb: 1, fontSize: 'var(--joy-fontSize-sm)' }}
-                    onChange={(event) => { event.preventDefault(); setMessageText(event.target.value) }}
+                    onChange={(event: any) => { event.preventDefault(); setMessageText(event.target.value) }}
                 />
-                <Button type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender }) }}>send</Button>
+                <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender }); setMessageText(''); }}>send</Button>
             </form>
             <ResponsiveDialog setUserName={setUserName} />
-            {messages.map((value: Message, index: number) => value.message ? (<div key={index}> {value.sender} : {value.message}</div>) : null)}
-        </>
+            {<List>
+                {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}> <ListItemText   >
+                    <Avatar sx={curColor}>N</Avatar>
+                    {value.sender} : {value.message} </ListItemText> </ListItem>) : null)
+                }
+            </List>
+            }
+        </div>
     );
 }
 
