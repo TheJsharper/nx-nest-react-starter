@@ -7,14 +7,16 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { AvatarBgColor } from '@types';
+import { ComponentsVariants } from '@mui/material/styles/variants';
+
 import * as React from 'react';
 
-export interface AppBarChatProps{
-  username?:string;
-  avatarBgColor?:AvatarBgColor;
+export interface AppBarChatProps {
+  username: string;
+  avatarBgColor: AvatarBgColor;
 }
 
-function ResponsiveAppBar(props:AppBarChatProps) {
+function ResponsiveAppBar(props: Partial<AppBarChatProps>) {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -43,7 +45,7 @@ function ResponsiveAppBar(props:AppBarChatProps) {
               textDecoration: 'none',
             }}
           >
-            LOGO
+            {"Chatting-Group".toUpperCase()}
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -56,7 +58,7 @@ function ResponsiveAppBar(props:AppBarChatProps) {
               color="inherit"
             >
             </IconButton>
-           
+
           </Box>
           <Typography
             variant="h5"
@@ -76,14 +78,17 @@ function ResponsiveAppBar(props:AppBarChatProps) {
           >
             LOGO
           </Typography>
-          
+
 
           <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title={props.username} color="primary" arrow placement="bottom-start"  >
+
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar sx={props.avatarBgColor}  > {props?.username? props?.username.substring(0, 1).toUpperCase(): 'NN'}</Avatar>
+                <Avatar sx={props.avatarBgColor}  > {props?.username ? props?.username.substring(0, 1).toUpperCase() : 'NN'}</Avatar>
               </IconButton>
-         
-          
+            </Tooltip>
+
+
           </Box>
         </Toolbar>
       </Container>
