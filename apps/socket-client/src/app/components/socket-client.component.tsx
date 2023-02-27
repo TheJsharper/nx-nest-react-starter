@@ -6,10 +6,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { ClientToServerEvents, Message, ServerToClientEvents } from "@types";
+import { AvatarBgColor, ClientToServerEvents, Message, ServerToClientEvents } from "@types";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { } from '@mui/material/colors'
 
 
 export interface ResponsiveDialogProps {
@@ -74,54 +73,12 @@ export const SocketClient = (props: SocketClientProps) => {
 
     const [messages, setMessages] = useState<Array<Message>>([]);
 
-    const setUserName = (name: string) => setSender(name);
-
-    console.log("====>x", props);
+    const setUserName = (name: string) => { setSender(name); console.log("COLOR", curColor, colors) };
 
 
-    const [colors, setColors] = useState<Map<string, { bgcolor: string, isUsed: boolean }>>(props.colors);
+    const [colors, setColors] = useState<Map<string, AvatarBgColor & { isUsed: boolean }>>(props.colors);
 
-    const [curColor, setCurColor] = useState<{ bgcolor: string }>({ bgcolor: '#fff' });
-
-
-    const getCurrColor = () => {
-        const index: number = findFirstElement();
-        if (index === -1) {
-            const newColors = resetColors();
-            setColors(newColors);
-            const newIndex = findFirstElement();
-            const el = Array.from(colors.entries())[newIndex][1];
-            setUsedColor(newIndex);
-            return el;
-        } else {
-            const el = Array.from(colors.entries())[index][1];
-            setUsedColor(index);
-            return el;
-        }
-    };
-
-    const findFirstElement = () => {
-        const index: number = Array.from(colors.entries()).findIndex((value: [string, { bgcolor: string, isUsed: boolean }]) => !value[1].isUsed);
-        return index;
-    }
-    const setUsedColor = (index: number) => {
-        Array.from(colors.entries()).findIndex((value: [string, { bgcolor: string, isUsed: boolean }]) => !value[1].isUsed)
-        Array.from(colors.entries()).reduce((prev: Map<string, { bgcolor: string, isUsed: boolean }>, cur: [string, { bgcolor: string, isUsed: boolean }], mapIndex: number) => {
-            if (mapIndex == index) {
-                prev.set(cur[0], { ...cur[1], isUsed: true });
-            } else {
-                prev.set(cur[0], { ...cur[1], isUsed: false });
-            }
-            return prev;
-        }, new Map<string, { bgcolor: string, isUsed: boolean }>())
-    }
-    const resetColors = () => {
-        return Array.from(colors.entries()).reduce((prev: Map<string, { bgcolor: string, isUsed: boolean }>, cur: [string, { bgcolor: string, isUsed: boolean }]) => {
-
-            prev.set(cur[0], { ...cur[1], isUsed: false });
-            return prev;
-        }, new Map<string, { bgcolor: string, isUsed: boolean }>())
-    }
+    const [curColor, setCurColor] = useState<AvatarBgColor>({ bgcolor: '#000' });
 
     useEffect(() => {
         const conn = props.socketRef.on('chatToClient', (messageToclient: Message) => {
@@ -129,11 +86,22 @@ export const SocketClient = (props: SocketClientProps) => {
             setMessages([...messages]);
 
         });
-        setCurColor(getCurrColor());
+
         return () => { console.log("component deytroy fnc"); conn.disconnect(); }
     }, []);
 
+    useEffect(() => {
 
+        setCurColor(getCurrColor());
+    }, [messages]);
+
+
+    const getCurrColor = () => {
+        const index = Math.floor(Math.random() * colors.size);
+        const next = Array.from(colors.entries())[index][1];
+
+        return { bgcolor: next.bgcolor };
+    };
 
     return (
         <div className="chat-container">
@@ -150,12 +118,12 @@ export const SocketClient = (props: SocketClientProps) => {
                     sx={{ mb: 1, fontSize: 'var(--joy-fontSize-sm)' }}
                     onChange={(event: any) => { event.preventDefault(); setMessageText(event.target.value) }}
                 />
-                <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender }); setMessageText(''); }}>send</Button>
+                <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender, bgcolor: curColor }); setMessageText(''); }}>send</Button>
             </form>
             <ResponsiveDialog setUserName={setUserName} />
             {<List>
                 {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}> <ListItemText   >
-                    <Avatar sx={curColor}>N</Avatar>
+                    <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toLowerCase()}</Avatar>
                     {value.sender} : {value.message} </ListItemText> </ListItem>) : null)
                 }
             </List>
