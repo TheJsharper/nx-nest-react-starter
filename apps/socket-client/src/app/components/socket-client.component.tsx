@@ -63,6 +63,8 @@ export function ResponsiveDialog(props: ResponsiveDialogProps) {
 export interface SocketClientProps {
     socketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
     colors: Map<string, { bgcolor: string, isUsed: boolean }>;
+    loginOutput: (userName: string) => void;
+    avatarBgColor:(bgColor: AvatarBgColor)=>void;
 }
 
 
@@ -73,7 +75,7 @@ export const SocketClient = (props: SocketClientProps) => {
 
     const [messages, setMessages] = useState<Array<Message>>([]);
 
-    const setUserName = (name: string) => { setSender(name); console.log("COLOR", curColor, colors) };
+    const setUserName = (name: string) => { setSender(name); props.loginOutput(name) };
 
 
     const [colors, setColors] = useState<Map<string, AvatarBgColor & { isUsed: boolean }>>(props.colors);
@@ -90,10 +92,7 @@ export const SocketClient = (props: SocketClientProps) => {
         return () => { console.log("component deytroy fnc"); conn.disconnect(); }
     }, []);
 
-    useEffect(() => {
-
-        setCurColor(getCurrColor());
-    }, [messages]);
+    useEffect(() =>{ setCurColor(getCurrColor()); props.avatarBgColor(curColor)}, [messages]);
 
 
     const getCurrColor = () => {
@@ -123,7 +122,7 @@ export const SocketClient = (props: SocketClientProps) => {
             <ResponsiveDialog setUserName={setUserName} />
             {<List>
                 {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}> <ListItemText   >
-                    <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toLowerCase()}</Avatar>
+                    <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toUpperCase()}</Avatar>
                     {value.sender} : {value.message} </ListItemText> </ListItem>) : null)
                 }
             </List>

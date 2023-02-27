@@ -1,6 +1,27 @@
 .chat-container{
+    margin-top: .5rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;   
+    flex-direction: column;
+    form{
+        display: flex;
+        align-items: flex-end;
+        max-width: 50%;
+        min-width: 0%;
+        width: 100%;
+        .MuiFormControl-root{
+            width: 100%;
+            display:flex ;
+            justify-content: flex-end;
+        }   
+
+    }
+
+    .MuiList-root{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 50%;
+    }
 }
