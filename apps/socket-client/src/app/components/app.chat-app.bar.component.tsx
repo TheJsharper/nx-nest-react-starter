@@ -10,6 +10,7 @@ import { AvatarBgColor } from '@types';
 import { ComponentsVariants } from '@mui/material/styles/variants';
 
 import * as React from 'react';
+import SearchAppBar from './app.notification.component';
 
 export interface AppBarChatProps {
   username: string;
@@ -78,6 +79,7 @@ function ResponsiveAppBar(props: Partial<AppBarChatProps>) {
           >
             LOGO
           </Typography>
+          <SearchAppBar />
 
 
           <Box sx={{ flexGrow: 0 }}>

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import ResponsiveAppBar from './components/app.chat-app.bar.component';
 import SocketClient from "./components/socket-client.component";
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
 
 const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
 
@@ -15,7 +16,7 @@ export function App() {
   const [userName, setUserName] = useState<string>();
   const [avataBgColor, setAvataBgColor] = useState<AvatarBgColor>();
   const getColors = () => {
-    const colors: Map<string, { bgcolor: string, isUsed: boolean }> = new Map<string, { bgcolor: string, isUsed: boolean }>();
+    const colors: Map<string, AvatarBgColor & { isUsed: boolean }> = new Map();
 
     colors.set(amber[500], { bgcolor: amber[500], isUsed: false });
     colors.set(blue[500], { bgcolor: blue[500], isUsed: false });
@@ -39,14 +40,14 @@ export function App() {
 
   }
 
-  const handleUserName=(userName:string):void=>setUserName(userName);
-  const handleAvatarBgColor= (bgColor:AvatarBgColor)=> setAvataBgColor(bgColor);
-  
+  const handleUserName = (userName: string): void => setUserName(userName);
+  const handleAvatarBgColor = (bgColor: AvatarBgColor) => setAvataBgColor(bgColor);
+
   return (
-    <>
-    <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} />
-    <SocketClient socketRef={socket} colors={getColors()} loginOutput={handleUserName}  avatarBgColor={handleAvatarBgColor}/>
-    </>
+    <CssVarsProvider>
+      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} />
+      <SocketClient socketRef={socket} colors={getColors()} loginOutput={handleUserName} avatarBgColor={handleAvatarBgColor} />
+    </CssVarsProvider>
   );
 
 }

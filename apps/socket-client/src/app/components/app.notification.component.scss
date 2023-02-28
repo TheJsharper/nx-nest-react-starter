@@ -1,0 +1,11 @@
+.MuiBox-root{
+  display: flex;
+  >div{
+    width:100%;
+
+  }
+  .bt-send{
+    background-color: var(--mui-palette-success-main);
+    color: var(--mui-palette-common-white);
+  }
+}
