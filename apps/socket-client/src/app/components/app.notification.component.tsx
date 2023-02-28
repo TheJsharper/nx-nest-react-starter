@@ -62,7 +62,7 @@ export default function NotificationFormAppBar(props: NotificationFormAppBarProp
   };
   return (
     <Box sx={{ flexGrow: 1 }} >
-
+      <Box sx={{marginRight:"auto", flexDirection:"column"}}>
       <InputLabel id="demo-simple-select-label">Type</InputLabel>
       <Select
         labelId="demo-simple-select-label"
@@ -76,7 +76,7 @@ export default function NotificationFormAppBar(props: NotificationFormAppBarProp
         <MenuItem value={"info"}>info</MenuItem>
         <MenuItem value={"success"}>success</MenuItem>
       </Select>
-
+      </Box>
       <Search>
         <SearchIconWrapper>
           <NotificationAddIcon />

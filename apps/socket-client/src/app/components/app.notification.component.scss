@@ -1,8 +1,7 @@
 .MuiBox-root{
   display: flex;
-  >div{
+  div:nth-child(2){
     width:100%;
-
   }
   .bt-send{
     background-color: var(--mui-palette-success-main);
