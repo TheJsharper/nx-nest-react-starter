@@ -10,14 +10,18 @@ import { AvatarBgColor } from '@types';
 import { ComponentsVariants } from '@mui/material/styles/variants';
 
 import * as React from 'react';
-import SearchAppBar from './app.notification.component';
+import NotificationFormAppBar from './app.notification.component';
 
 export interface AppBarChatProps {
   username: string;
   avatarBgColor: AvatarBgColor;
 }
+export interface AppBarChatPropsRequired{
+  
+  onNotify:(value:string)=> void;
+}
 
-function ResponsiveAppBar(props: Partial<AppBarChatProps>) {
+function ResponsiveAppBar(props: Partial<AppBarChatProps> & AppBarChatPropsRequired) {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -79,7 +83,7 @@ function ResponsiveAppBar(props: Partial<AppBarChatProps>) {
           >
             LOGO
           </Typography>
-          <SearchAppBar />
+          <NotificationFormAppBar onNotify={props.onNotify} />
 
 
           <Box sx={{ flexGrow: 0 }}>

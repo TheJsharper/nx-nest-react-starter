@@ -8,6 +8,7 @@ import { io, Socket } from "socket.io-client";
 import ResponsiveAppBar from './components/app.chat-app.bar.component';
 import SocketClient from "./components/socket-client.component";
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import axios from 'axios';
 
 const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
 
@@ -42,10 +43,18 @@ export function App() {
 
   const handleUserName = (userName: string): void => setUserName(userName);
   const handleAvatarBgColor = (bgColor: AvatarBgColor) => setAvataBgColor(bgColor);
+  const sendNotification = async (notifyPayload: string) => {
+    const data: { message: string } = { message: notifyPayload };
+
+    const response = await axios.post("http://localhost:3333/api/notify/create", {
+      data
+    });
+    console.log("===Y", response);
+  };
 
   return (
     <CssVarsProvider>
-      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} />
+      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} onNotify={(value: string) => { console.log("Input", value); sendNotification(value); }} />
       <SocketClient socketRef={socket} colors={getColors()} loginOutput={handleUserName} avatarBgColor={handleAvatarBgColor} />
     </CssVarsProvider>
   );

@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Button from "@mui/material/Button";
 import InputBase from '@mui/material/InputBase';
 import { alpha, styled } from '@mui/material/styles';
+import { useState } from 'react';
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -45,7 +46,12 @@ const Search = styled('div')(({ theme }) => ({
     },
   }));
 
-  export default function SearchAppBar() {
+  export interface NotificationFormAppBarProps{
+    onNotify: (value:string)=>void;
+  }
+
+  export default function NotificationFormAppBar(props:NotificationFormAppBarProps) {
+    const[notify, setNotify] =useState<string>('');
     return (
       <Box  sx={{ flexGrow: 1 }} >
             
@@ -56,9 +62,10 @@ const Search = styled('div')(({ theme }) => ({
               <StyledInputBase 
                 placeholder="Notificy all chat client...."
                 inputProps={{ 'aria-label': 'search' }}
+                onChange={(event)=>setNotify(event.target.value)}
               />
             </Search>
-            <Button className='bt-send'  >send</Button>
+            <Button className='bt-send' onClick={ ()=>props.onNotify(notify)} >send</Button>
       </Box>
     );
   }
