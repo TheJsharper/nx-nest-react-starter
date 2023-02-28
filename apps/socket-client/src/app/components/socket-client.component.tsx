@@ -1,4 +1,4 @@
-import { Avatar, Input, List, ListItem, ListItemText, TextField } from "@mui/material";
+import { Avatar, Collapse, IconButton, Input, List, ListItem, ListItemText, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -6,16 +6,46 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { AvatarBgColor, ClientToServerEvents, Message, ServerToClientEvents } from "@types";
-import { useEffect, useState } from "react";
+import { AvatarBgColor, ClientToServerEvents, Message, Notification, NotificationClientToClientEvents, ServerToClientEvents } from "@types";
+import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import CloseIcon from '@mui/icons-material/Close';
 
 
 export interface ResponsiveDialogProps {
     setUserName: (value: string) => void;
 }
 
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+) {
 
+    const [alert, setAlert] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setAlert(false);
+
+        }, 3000);
+
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    return (<Collapse in={alert}>
+        <MuiAlert elevation={6} ref={ref} variant="filled" {...props} action={
+            <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => setAlert(false)}
+            >
+                <CloseIcon fontSize="inherit" />
+            </IconButton>
+        } /> </Collapse>);
+});
 
 export function ResponsiveDialog(props: ResponsiveDialogProps) {
     const [open, setOpen] = useState<boolean>(true);
@@ -61,10 +91,15 @@ export function ResponsiveDialog(props: ResponsiveDialogProps) {
 
 
 export interface SocketClientProps {
-    socketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
+    chatSocketRef: Socket<ServerToClientEvents, ClientToServerEvents>;
+
+    chatNotificationRef: Socket<NotificationClientToClientEvents, any>;
+
     colors: Map<string, { bgcolor: string, isUsed: boolean }>;
+
     loginOutput: (userName: string) => void;
-    avatarBgColor:(bgColor: AvatarBgColor)=>void;
+
+    avatarBgColor: (bgColor: AvatarBgColor) => void;
 }
 
 
@@ -77,22 +112,30 @@ export const SocketClient = (props: SocketClientProps) => {
 
     const setUserName = (name: string) => { setSender(name); props.loginOutput(name) };
 
-
     const [colors, setColors] = useState<Map<string, AvatarBgColor & { isUsed: boolean }>>(props.colors);
 
     const [curColor, setCurColor] = useState<AvatarBgColor>({ bgcolor: '#000' });
 
+    const [notification, setNotification] = useState<Notification | null>(null);
+
+    const [notifications, setNotifications] = useState<Array<Notification>>([]);
+
     useEffect(() => {
-        const conn = props.socketRef.on('chatToClient', (messageToclient: Message) => {
+        const chatClientSocket = props.chatSocketRef.on('chatToClient', (messageToclient: Message) => {
             messages.push(messageToclient);
             setMessages([...messages]);
 
         });
+        const chatNotificationSocket = props.chatNotificationRef.on("notifyToClient", (notification: Notification) => {
+            setNotification(notification);
+            notifications.push(notification);
+            setNotifications([...notifications])
+        });
 
-        return () => { console.log("component deytroy fnc"); conn.disconnect(); }
+        return () => { console.log("component deytroy fnc"); chatClientSocket.disconnect(); chatNotificationSocket.disconnect(); }
     }, []);
 
-    useEffect(() =>{ setCurColor(getCurrColor()); props.avatarBgColor(curColor)}, [messages]);
+    useEffect(() => { setCurColor(getCurrColor()); props.avatarBgColor(curColor) }, [messages]);
 
 
     const getCurrColor = () => {
@@ -117,13 +160,25 @@ export const SocketClient = (props: SocketClientProps) => {
                     sx={{ mb: 1, fontSize: 'var(--joy-fontSize-sm)' }}
                     onChange={(event: any) => { event.preventDefault(); setMessageText(event.target.value) }}
                 />
-                <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.socketRef.emit("chatToServer", { message: messageText, sender, bgcolor: curColor }); setMessageText(''); }}>send</Button>
+                <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.chatSocketRef.emit("chatToServer", { message: messageText, sender, bgcolor: curColor }); setMessageText(''); }}>send</Button>
+
+                {<List>
+                    {notifications.map((value: Notification, index: number) => (
+                        <ListItem key={index}>
+                            <ListItemText>
+                                <Alert security={value.type} >{value.message}</Alert>
+                            </ListItemText>
+                        </ListItem>
+                    ))}
+                </List>}
             </form>
             <ResponsiveDialog setUserName={setUserName} />
             {<List>
-                {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}> <ListItemText   >
-                    <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toUpperCase()}</Avatar>
-                    {value.sender} : {value.message} </ListItemText> </ListItem>) : null)
+                {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}>
+                    <ListItemText   >
+                        <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toUpperCase()}</Avatar>
+                        {value.sender} : {value.message}
+                    </ListItemText> </ListItem>) : null)
                 }
             </List>
             }

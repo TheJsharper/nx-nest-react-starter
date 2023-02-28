@@ -21,4 +21,4 @@ export interface Message { sender: string, message: string, bgcolor: AvatarBgCol
 
 export interface AvatarBgColor { bgcolor: string }
 
-export interface Notification { type: 'Alert' | 'Notification' | 'Log'; message: string }
+export interface Notification { type: 'error' | 'warning' | 'info' | 'success'; message: string }

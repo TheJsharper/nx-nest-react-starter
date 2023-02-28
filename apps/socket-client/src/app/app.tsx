@@ -2,15 +2,16 @@ import {
   amber, blue, blueGrey, brown, cyan, deepOrange, green, grey, indigo, lightBlue, lightGreen, lime,
   orange, pink, purple, red, teal, yellow
 } from '@mui/material/colors';
-import { AvatarBgColor, ClientToServerEvents, ServerToClientEvents } from '@types';
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { AvatarBgColor, ClientToServerEvents, Notification, NotificationClientToClientEvents, ServerToClientEvents } from '@types';
+import axios from 'axios';
 import { useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import ResponsiveAppBar from './components/app.chat-app.bar.component';
 import SocketClient from "./components/socket-client.component";
-import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
-import axios from 'axios';
 
-const socket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
+const chatSocket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
+const notificationSocket: Socket<any, NotificationClientToClientEvents> = io("http://localhost:3333/notify",);
 
 
 export function App() {
@@ -44,18 +45,19 @@ export function App() {
   const handleUserName = (userName: string): void => setUserName(userName);
   const handleAvatarBgColor = (bgColor: AvatarBgColor) => setAvataBgColor(bgColor);
   const sendNotification = async (notifyPayload: string) => {
-    const data: { message: string } = { message: notifyPayload };
+    const data: Notification = { type: 'info', message: notifyPayload };
 
-    const response = await axios.post("http://localhost:3333/api/notify/create", {
-      data
-    });
+    const response = await axios.post<any, any, Notification>("http://localhost:3333/api/notify/", data, {
+      data: { ...data }
+
+    },);
     console.log("===Y", response);
   };
 
   return (
     <CssVarsProvider>
-      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} onNotify={(value: string) => { console.log("Input", value); sendNotification(value); }} />
-      <SocketClient socketRef={socket} colors={getColors()} loginOutput={handleUserName} avatarBgColor={handleAvatarBgColor} />
+      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} onNotify={(value: string) => { sendNotification(value); }} />
+      <SocketClient chatSocketRef={chatSocket} chatNotificationRef={notificationSocket} colors={getColors()} loginOutput={handleUserName} avatarBgColor={handleAvatarBgColor} />
     </CssVarsProvider>
   );
 
