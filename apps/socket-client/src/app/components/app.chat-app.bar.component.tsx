@@ -7,7 +7,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { AvatarBgColor } from '@types';
-import { ComponentsVariants } from '@mui/material/styles/variants';
 
 import * as React from 'react';
 import NotificationFormAppBar from './app.notification.component';
@@ -18,7 +17,7 @@ export interface AppBarChatProps {
 }
 export interface AppBarChatPropsRequired{
   
-  onNotify:(value:string)=> void;
+  onNotify:(type: 'error' | 'warning' | 'info' | 'success', value:string)=> void;
 }
 
 function ResponsiveAppBar(props: Partial<AppBarChatProps> & AppBarChatPropsRequired) {

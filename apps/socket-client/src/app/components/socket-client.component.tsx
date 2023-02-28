@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
+import Box from '@mui/material/Box';
 
 
 export interface ResponsiveDialogProps {
@@ -26,7 +27,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setAlert(false);
+            setAlert(false);            
 
         }, 3000);
 
@@ -34,8 +35,8 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
         return () => clearTimeout(timer);
     }, []);
 
-    return (<Collapse in={alert}>
-        <MuiAlert elevation={6} ref={ref} variant="filled" {...props} action={
+    return (alert ? <Collapse in={alert}>
+        <MuiAlert variant="outlined" elevation={6} ref={ref} {...props} action={
             <IconButton
                 aria-label="close"
                 color="inherit"
@@ -44,7 +45,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
             >
                 <CloseIcon fontSize="inherit" />
             </IconButton>
-        } /> </Collapse>);
+        } /> </Collapse> : null);
 });
 
 export function ResponsiveDialog(props: ResponsiveDialogProps) {
@@ -166,21 +167,23 @@ export const SocketClient = (props: SocketClientProps) => {
                     {notifications.map((value: Notification, index: number) => (
                         <ListItem key={index}>
                             <ListItemText>
-                                <Alert security={value.type} >{value.message}</Alert>
+                                <Alert severity={value.type} >{value.message}</Alert>
                             </ListItemText>
                         </ListItem>
                     ))}
                 </List>}
             </form>
             <ResponsiveDialog setUserName={setUserName} />
-            {<List>
-                {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}>
-                    <ListItemText   >
-                        <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toUpperCase()}</Avatar>
-                        {value.sender} : {value.message}
-                    </ListItemText> </ListItem>) : null)
-                }
-            </List>
+            {<Box sx={{ flex: '2' }}>
+                <List>
+                    {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}>
+                        <ListItemText   >
+                            <Avatar sx={value.bgcolor}>{value.sender.length === 0 ? 'NN' : value.sender.substring(0, 1).toUpperCase()}</Avatar>
+                            {value.sender} : {value.message}
+                        </ListItemText> </ListItem>) : null)
+                    }
+                </List>
+            </Box>
             }
         </div>
     );

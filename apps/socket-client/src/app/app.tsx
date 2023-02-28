@@ -11,6 +11,7 @@ import ResponsiveAppBar from './components/app.chat-app.bar.component';
 import SocketClient from "./components/socket-client.component";
 
 const chatSocket: Socket<ClientToServerEvents, ServerToClientEvents> = io("http://localhost:3333/chat");
+
 const notificationSocket: Socket<any, NotificationClientToClientEvents> = io("http://localhost:3333/notify",);
 
 
@@ -44,8 +45,9 @@ export function App() {
 
   const handleUserName = (userName: string): void => setUserName(userName);
   const handleAvatarBgColor = (bgColor: AvatarBgColor) => setAvataBgColor(bgColor);
-  const sendNotification = async (notifyPayload: string) => {
-    const data: Notification = { type: 'info', message: notifyPayload };
+  const sendNotification = async (type: 'error' | 'warning' | 'info' | 'success', message: string) => {
+    const data: Notification = { type, message };
+    console.log("TYPE", data);
 
     const response = await axios.post<any, any, Notification>("http://localhost:3333/api/notify/", data, {
       data: { ...data }
@@ -56,7 +58,7 @@ export function App() {
 
   return (
     <CssVarsProvider>
-      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} onNotify={(value: string) => { sendNotification(value); }} />
+      <ResponsiveAppBar username={userName} avatarBgColor={avataBgColor} onNotify={(type: 'error' | 'warning' | 'info' | 'success', value: string) => { sendNotification(type, value); }} />
       <SocketClient chatSocketRef={chatSocket} chatNotificationRef={notificationSocket} colors={getColors()} loginOutput={handleUserName} avatarBgColor={handleAvatarBgColor} />
     </CssVarsProvider>
   );

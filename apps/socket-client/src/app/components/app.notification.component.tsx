@@ -43,14 +43,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     [theme.breakpoints.up('sm')]: {
       width: '15ch',
       '&:focus': {
-        width: '30ch',
+        width: '100%',
       },
     },
   },
 }));
 
 export interface NotificationFormAppBarProps {
-  onNotify: (value: string) => void;
+  onNotify: (type: 'error' | 'warning' | 'info' | 'success', value: string) => void;
 }
 
 export default function NotificationFormAppBar(props: NotificationFormAppBarProps) {
@@ -58,24 +58,22 @@ export default function NotificationFormAppBar(props: NotificationFormAppBarProp
   const [type, setType] = useState<'error' | 'warning' | 'info' | 'success'>('info');
   const handleChange = (event: SelectChangeEvent) => {
     setType(event.target.value as ('error' | 'warning' | 'info' | 'success'));
-    console.log("TYPE",event );
   };
   return (
     <Box sx={{ flexGrow: 1 }} >
-      <Box sx={{marginRight:"auto", flexDirection:"column"}}>
-      <InputLabel id="demo-simple-select-label">Type</InputLabel>
-      <Select
-        labelId="demo-simple-select-label"
-        id="demo-simple-select"
-        value={type}
-        label="Type"
-        onChange={handleChange}
-      >
-        <MenuItem value={"error"}>error</MenuItem>
-        <MenuItem value={"warning"}>warning</MenuItem>
-        <MenuItem value={"info"}>info</MenuItem>
-        <MenuItem value={"success"}>success</MenuItem>
-      </Select>
+      <Box sx={{ marginRight: "auto", flexDirection: "column" }}>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={type}
+          label="Type"
+          onChange={handleChange}
+        >
+          <MenuItem value={"error"}>error</MenuItem>
+          <MenuItem value={"warning"}>warning</MenuItem>
+          <MenuItem value={"info"}>info</MenuItem>
+          <MenuItem value={"success"}>success</MenuItem>
+        </Select>
       </Box>
       <Search>
         <SearchIconWrapper>
@@ -87,7 +85,7 @@ export default function NotificationFormAppBar(props: NotificationFormAppBarProp
           onChange={(event) => setNotify(event.target.value)}
         />
       </Search>
-      <Button className='bt-send' onClick={() => props.onNotify(notify)} >send</Button>
+      <Button className='bt-send' onClick={() => props.onNotify(type, notify)} >send</Button>
     </Box>
   );
 }
