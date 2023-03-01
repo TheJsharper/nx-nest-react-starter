@@ -7,7 +7,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { AvatarBgColor, ClientToServerEvents, Message, Notification, NotificationClientToClientEvents, ServerToClientEvents } from "@types";
-import React, { useEffect, useState } from "react";
+import React, { Children, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,17 +17,20 @@ import Box from '@mui/material/Box';
 export interface ResponsiveDialogProps {
     setUserName: (value: string) => void;
 }
+export interface AlertCustomProps {
+    status: (value: boolean) => void;
+}
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref,
+    props: AlertProps,
+    ref: React.ForwardedRef<HTMLDivElement>,
 ) {
 
     const [alert, setAlert] = useState(true);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            setAlert(false);            
+            setAlert(false);
 
         }, 3000);
 
@@ -36,7 +39,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
     }, []);
 
     return (alert ? <Collapse in={alert}>
-        <MuiAlert variant="outlined" elevation={6} ref={ref} {...props} action={
+        <MuiAlert variant="filled" elevation={6} ref={ref} {...props} action={
             <IconButton
                 aria-label="close"
                 color="inherit"
@@ -102,7 +105,9 @@ export interface SocketClientProps {
 
     avatarBgColor: (bgColor: AvatarBgColor) => void;
 }
-
+const EmptyTextHelper = ({ children }: { children?: React.ReactNode }) => !React.isValidElement(children) && children === "" ? (
+    <span className="italic">No text</span>) : (
+    <>{children}</>);
 
 export const SocketClient = (props: SocketClientProps) => {
     const [messageText, setMessageText] = useState<string>("");
@@ -137,7 +142,10 @@ export const SocketClient = (props: SocketClientProps) => {
     }, []);
 
     useEffect(() => { setCurColor(getCurrColor()); props.avatarBgColor(curColor) }, [messages]);
+    useEffect(() => {
+        console.log("Notifications", notifications);
 
+    }, [notifications]);
 
     const getCurrColor = () => {
         const index = Math.floor(Math.random() * colors.size);
@@ -163,18 +171,18 @@ export const SocketClient = (props: SocketClientProps) => {
                 />
                 <Button disabled={messageText === "" && messageText.length === 0} type="submit" onClick={() => { props.chatSocketRef.emit("chatToServer", { message: messageText, sender, bgcolor: curColor }); setMessageText(''); }}>send</Button>
 
-                {<List>
-                    {notifications.map((value: Notification, index: number) => (
-                        <ListItem key={index}>
-                            <ListItemText>
-                                <Alert severity={value.type} >{value.message}</Alert>
-                            </ListItemText>
-                        </ListItem>
-                    ))}
-                </List>}
             </form>
+            {<List className="notify-list">
+                {notifications.map((value: Notification, index: number) => (
+                    <ListItem key={index}>
+                        <ListItemText>
+                            <Alert severity={value.type} >{value.message}</Alert>
+                        </ListItemText>
+                    </ListItem>
+                ))}
+            </List>}
             <ResponsiveDialog setUserName={setUserName} />
-            {<Box sx={{ flex: '2' }}>
+            {<Box className="chat-list">
                 <List>
                     {messages.map((value: Message, index: number) => value.message ? (<ListItem key={index}>
                         <ListItemText   >

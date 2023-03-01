@@ -20,7 +20,20 @@
         }
 
     }
+    .notify-list{
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        z-index: 2;
+    }
 
+
+    .chat-list{
+        max-width: 50%;
+        min-width: 0%;
+        min-height: 100%;
+        width: 100%;
+    }
     .MuiList-root {
         display: flex;
         flex-direction: column;
