@@ -37,6 +37,9 @@
         "backend"
       ]
     },
+    "auth-api": {
+      "tags": []
+    },
     "client": {
       "tags": [
         "frontend"
