@@ -7,12 +7,12 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app/app.module';
-import * as session from 'express-session';
-import * as passport from 'passport';
+//import * as session from 'express-session';
+//import * as passport from 'passport';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.use(session({
+  /*app.use(session({
 
     secret: 'SECRET_KEY',
     resave: false,
@@ -23,7 +23,7 @@ async function bootstrap() {
   })
   );
   app.use(passport.initialize());
-  app.use(passport.session());
+  app.use(passport.session());*/
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
