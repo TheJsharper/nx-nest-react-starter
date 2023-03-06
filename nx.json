@@ -53,6 +53,9 @@
         "client"
       ]
     },
+    "simple-rest-api": {
+      "tags": []
+    },
     "socket-client": {
       "tags": []
     },

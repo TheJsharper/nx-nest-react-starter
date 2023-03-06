@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 export function types(): string {
   return 'types';
 }
@@ -22,3 +23,10 @@ export interface Message { sender: string, message: string, bgcolor: AvatarBgCol
 export interface AvatarBgColor { bgcolor: string }
 
 export interface Notification { type: 'error' | 'warning' | 'info' | 'success'; message: string }
+
+export class User {
+  @ApiProperty({ required: false })
+  id?: number;
+  @ApiProperty()
+  name: string;
+}
