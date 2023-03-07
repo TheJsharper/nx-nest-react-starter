@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsAlphanumeric, MaxLength } from 'class-validator';
 export function types(): string {
   return 'types';
 }
@@ -28,5 +29,7 @@ export class User {
   @ApiProperty({ required: false })
   id?: number;
   @ApiProperty()
+  @IsAlphanumeric()
+  @MaxLength(255, {message:'Your name must be less than 2555'})
   name: string;
 }
