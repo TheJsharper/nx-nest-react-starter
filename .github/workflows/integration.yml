@@ -18,7 +18,7 @@ jobs:
           restore-keys: ${{ runner.os }}-build-${{ env.cache-name }}-
 
       - name: Install Dependencies
-        run: npm i
+        run: npm i --force
 
       - name: Lint affected Files
         run: npm run affected:lint
